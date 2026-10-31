@@ -4,7 +4,9 @@ from pathlib import Path
  
 import pandas as pd
  
-DATA_DIR = Path(os.getenv("DATA_DIR", "data/raw"))
+# Default: <backend>/data/raw, resolved from this file so it does not depend on the
+# working directory (local run, Docker and Vercel all start from different places).
+DATA_DIR = Path(os.getenv("DATA_DIR", Path(__file__).resolve().parents[1] / "data" / "raw"))
 CORS_ORIGINS = os.getenv("CORS_ORIGINS", "http://localhost:5173").split(",")
  
 # Delivery days whose decisions are made in January 2026: 2 Jan to 1 Feb (end exclusive).

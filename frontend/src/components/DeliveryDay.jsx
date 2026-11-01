@@ -10,8 +10,8 @@ import {
   YAxis,
 } from "recharts";
 import { axis, COLORS, grid, legend, tooltip } from "../chartTheme";
-import { fmt, fmtSigned, hhmm, utcLabel } from "../format";
-import { useApi } from "../hooks";
+import { everyNth, fmt, fmtSigned, hhmm, utcLabel } from "../format";
+import { useApi, useMediaQuery } from "../hooks";
 import Section from "./Section";
 import Status from "./Status";
 
@@ -47,6 +47,10 @@ export default function DeliveryDay({ cutoffHour, windowDays }) {
     () => [...new Set((latest.data?.points ?? []).map((p) => p.publishTime))].map(utcLabel),
     [latest.data]
   );
+
+  // On phones the axis shows fewer hour labels and a narrower value axis, so nothing overlaps.
+  const narrow = useMediaQuery("(max-width: 600px)");
+  const ticks = useMemo(() => everyNth(rows.map((r) => r.time), narrow ? 6 : 3), [rows, narrow]);
 
   const cutoffLabel = latest.data?.cutoff_time
     ? `${latest.data.cutoff_time.slice(0, 16).replace("T", " ")} UTC`
@@ -95,10 +99,13 @@ export default function DeliveryDay({ cutoffHour, windowDays }) {
 
       {rows.length > 0 && (
         <ResponsiveContainer width="100%" height={380}>
-          <LineChart data={rows} margin={{ top: 20, right: 20, bottom: 0, left: 10 }}>
+          <LineChart
+            data={rows}
+            margin={{ top: 20, right: narrow ? 8 : 20, bottom: 0, left: narrow ? 0 : 10 }}
+          >
             <CartesianGrid {...grid} />
-            <XAxis dataKey="time" interval={2} {...axis} />
-            <YAxis tickFormatter={fmt} unit=" MW" width={100} {...axis} />
+            <XAxis dataKey="time" ticks={ticks} interval={0} {...axis} />
+            <YAxis tickFormatter={fmt} unit={narrow ? "" : " MW"} width={narrow ? 56 : 100} {...axis} />
             <Tooltip {...tooltip} formatter={(v) => (v == null ? "–" : `${fmt(v)} MW`)} />
             <Legend {...legend} />
             <Line type="monotone" dataKey="actual" name="Actual" stroke={COLORS.actual} dot={false} strokeWidth={2.5} />
@@ -107,6 +114,7 @@ export default function DeliveryDay({ cutoffHour, windowDays }) {
           </LineChart>
         </ResponsiveContainer>
       )}
+      <p className="hint">Hourly values in MW, times in UTC.</p>
     </Section>
   );
 }

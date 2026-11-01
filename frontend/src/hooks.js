@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { apiGet } from "./api";
  
@@ -19,4 +20,21 @@ export function useApi(path, params) {
   }, [key]);
  
   return state;
+}
+ 
+/** True while the CSS media query matches (updates when the screen size changes). */
+export function useMediaQuery(query) {
+  const supported = typeof window !== "undefined" && typeof window.matchMedia === "function";
+  const [matches, setMatches] = useState(() => (supported ? window.matchMedia(query).matches : false));
+ 
+  useEffect(() => {
+    if (!supported) return undefined;
+    const mql = window.matchMedia(query);
+    const onChange = () => setMatches(mql.matches);
+    onChange();
+    mql.addEventListener("change", onChange);
+    return () => mql.removeEventListener("change", onChange);
+  }, [query, supported]);
+ 
+  return matches;
 }

@@ -17,3 +17,6 @@ export const hourLabel = (h) => {
   const mm = Math.round((h - hh) * 60);
   return `${String(hh).padStart(2, "0")}:${String(mm).padStart(2, "0")}`;
 };
+ 
+/** Every n-th item, starting with the first: used to thin out chart axis labels. */
+export const everyNth = (items, n) => items.filter((_, i) => i % n === 0);

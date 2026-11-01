@@ -10,8 +10,8 @@ import {
   YAxis,
 } from "recharts";
 import { axis, COLORS, grid, legend, tooltip } from "../chartTheme";
-import { fmt, hourLabel } from "../format";
-import { useApi } from "../hooks";
+import { everyNth, fmt, hourLabel } from "../format";
+import { useApi, useMediaQuery } from "../hooks";
 import Section from "./Section";
 import Status from "./Status";
 
@@ -29,6 +29,9 @@ export default function CutoffSensitivity() {
     [sensitivity.data]
   );
 
+  const narrow = useMediaQuery("(max-width: 600px)");
+  const ticks = useMemo(() => everyNth(rows.map((r) => r.cutoff), narrow ? 2 : 1), [rows, narrow]);
+
   return (
     <Section
       id="sensitivity"
@@ -39,10 +42,13 @@ export default function CutoffSensitivity() {
       <Status {...sensitivity} />
       {rows.length > 0 && (
         <ResponsiveContainer width="100%" height={320}>
-          <LineChart data={rows} margin={{ top: 20, right: 20, bottom: 0, left: 10 }}>
+          <LineChart
+            data={rows}
+            margin={{ top: 20, right: narrow ? 8 : 20, bottom: 0, left: narrow ? 0 : 10 }}
+          >
             <CartesianGrid {...grid} />
-            <XAxis dataKey="cutoff" {...axis} />
-            <YAxis tickFormatter={fmt} unit=" MW" width={100} {...axis} />
+            <XAxis dataKey="cutoff" ticks={ticks} interval={0} {...axis} />
+            <YAxis tickFormatter={fmt} unit={narrow ? "" : " MW"} width={narrow ? 56 : 100} {...axis} />
             <Tooltip {...tooltip} formatter={(v) => `${fmt(v)} MW`} />
             <Legend {...legend} />
             <Line type="monotone" dataKey="mae" name="MAE" stroke={COLORS.forecast} strokeWidth={2.5} />

@@ -184,3 +184,8 @@ The repo is deployed as two Vercel projects, both importing this repository:
 
 This project was built with the help of **Claude (Anthropic)**, used as a coding assistant for
 architecture discussions, code and test generation, debugging and documentation.
+
+## Links
+
+- **Live app:** https://gaap-gb-wind-cnf5.vercel.app
+- **API docs:** https://gaap-gb-wind.vercel.app/docs
